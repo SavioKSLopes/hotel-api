@@ -76,6 +76,8 @@ class ReserveService
                 ]);
             }
 
+            $couponId = $coupon->id;
+
             $discount = $this->calculateDiscount($coupon, $total);
 
         }
