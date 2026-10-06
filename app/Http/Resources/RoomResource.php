@@ -18,6 +18,7 @@ class RoomResource extends JsonResource
             'id' => $this->id,
             'hotel_id' => $this->hotel_id,
             'name' => $this->name,
+            'external_id' => $this->external_id,
         ];
     }
 }
