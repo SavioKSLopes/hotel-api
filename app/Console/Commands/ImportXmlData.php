@@ -11,6 +11,7 @@ use App\Models\ReserveDaily;
 use App\Models\Room;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 class ImportXmlData extends Command
 {
@@ -20,6 +21,8 @@ class ImportXmlData extends Command
 
     public function handle(): int
     {
+        Log::info('Importação XML iniciada');
+
         if ($this->importHotels() === Command::FAILURE) {
             return Command::FAILURE;
         }
@@ -33,11 +36,13 @@ class ImportXmlData extends Command
         }
 
         return Command::SUCCESS;
+
+        Log::info('Importação XML concluída com sucesso');
     }
 
     private function importHotels(): int
     {
-        $filePath = storage_path('app/imports/hotels.xml');
+        $filePath = base_path('docs/xml/hotels.xml');
 
         if (!file_exists($filePath)) {
             $this->error("Arquivo XML não encontrado: {$filePath}");
@@ -71,12 +76,16 @@ class ImportXmlData extends Command
             "Importação concluída: {$importedHotels} hotel(is) processado(s)."
         );
 
+        Log::info('Importação de hotéis concluída', [
+            'imported_hotels' => $importedHotels,
+        ]);
+
         return Command::SUCCESS;
     }
 
     private function importRooms(): int
     {
-        $filePath = storage_path('app/imports/rooms.xml');
+        $filePath = base_path('docs/xml/rooms.xml');
 
         if (!file_exists($filePath)) {
             $this->error("Arquivo XML não encontrado: {$filePath}");
@@ -129,12 +138,16 @@ class ImportXmlData extends Command
             "Importação concluída: {$importedRooms} quarto(s) processado(s)."
         );
 
+        Log::info('Importação de quartos concluída', [
+            'imported_rooms' => $importedRooms,
+        ]);
+
         return Command::SUCCESS;
     }
 
     private function importReserves(): int
     {
-        $filePath = storage_path('app/imports/reserves.xml');
+        $filePath = base_path('docs/xml/reserves.xml');
 
         if (!file_exists($filePath)) {
             $this->error("Arquivo XML não encontrado: {$filePath}");
@@ -294,6 +307,12 @@ class ImportXmlData extends Command
                     }
                 });
             } catch (\Throwable $e) {
+
+                Log::error('Falha ao importar reserva XML', [
+                    'external_id' => $externalId,
+                    'message' => $e->getMessage(),
+                ]);
+
                 $this->error(
                     "Erro ao importar a reserva {$externalId}: "
                     . $e->getMessage()
@@ -309,6 +328,10 @@ class ImportXmlData extends Command
             "Importação concluída: {$importedReserves} reserva(s) "
             . "processada(s)."
         );
+
+        Log::info('Importação de reservas concluída', [
+            'imported_reserves' => $importedReserves,
+        ]);
 
         return Command::SUCCESS;
     }
