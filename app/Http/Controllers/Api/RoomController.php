@@ -5,7 +5,6 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\UpdateRoomRequest;
 use App\Http\Resources\RoomResource;
-use Illuminate\Http\Request;
 use App\Models\Room;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 use App\Http\Requests\StoreRoomRequest;
