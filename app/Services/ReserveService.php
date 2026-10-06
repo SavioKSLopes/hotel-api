@@ -8,7 +8,7 @@ use App\Models\Reserve;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
-
+use Illuminate\Support\Facades\Log;
 
 class ReserveService
 {
@@ -119,6 +119,13 @@ class ReserveService
                 Carbon::parse($data['check_in']),
                 Carbon::parse($data['check_out'])
             )) {
+                Log::warning('Tentativa de reserva em quarto indisponível', [
+                    'room_id' => $data['room_id'],
+                    'hotel_id' => $data['hotel_id'],
+                    'external_id' => $data['external_id'],
+                    'check_in' => $data['check_in'],
+                    'check_out' => $data['check_out'],
+                ]);
                 throw ValidationException::withMessages([
                     'room_id' => 'Quarto indisponível no período informado.',
                 ]);
@@ -146,6 +153,19 @@ class ReserveService
             if ($totals['coupon'] !== null) {
                 $this->deactivateCoupon($totals['coupon']);
             }
+
+            Log::info('Reserva criada com sucesso', [
+                'reserve_id' => $reserve->id,
+                'external_id' => $reserve->external_id,
+                'hotel_id' => $reserve->hotel_id,
+                'room_id' => $reserve->room_id,
+                'guest_id' => $reserve->guest_id,
+                'coupon_id' => $reserve->coupon_id,
+                'total' => $reserve->total,
+                'discount_total' => $reserve->discount_total,
+                'fee_total' => $reserve->fee_total,
+                'final_total' => $reserve->final_total,
+            ]);
 
             return $reserve;
         });
