@@ -1,0 +1,53 @@
+[33mcommit 8fa4051590f31ef082a774d9d3ebf66704471fd3[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mfeature/reservas-cupons[m[33m)[m
+Author: SavioKSLopes <koiwasubete@gmail.com>
+Date:   Tue Oct 6 14:50:38 2026 -0300
+
+    fix: corrige vínculo de cupom em reservas
+
+[33mcommit 27510b40c141aae4b311c5c991a26d6deeb0c4f0[m[33m ([m[1;31morigin/feature/reservas-cupons[m[33m)[m
+Author: SavioKSLopes <koiwasubete@gmail.com>
+Date:   Tue Oct 6 12:44:54 2026 -0300
+
+    feat: implementa reservas com cupons e taxas
+
+[33mcommit 6892abe776fa506bb33caefe9f95f388b62f2896[m[33m ([m[1;31morigin/feature/room-availability[m[33m, [m[1;32mfeature/room-availability[m[33m, [m[1;32mfeature/post-reserves[m[33m)[m
+Author: SavioKSLopes <koiwasubete@gmail.com>
+Date:   Mon Oct 5 23:48:26 2026 -0300
+
+    feat: adiciona validação de disponibilidade de quartos por data de check-in/check-out
+
+[33mcommit 452a07db2ac902824e1fca516c544c57aae87c04[m[33m ([m[1;31morigin/feature/post-reserves[m[33m, [m[1;32mfeature/crud-rooms[m[33m)[m
+Author: SavioKSLopes <koiwasubete@gmail.com>
+Date:   Mon Oct 5 23:15:47 2026 -0300
+
+    feat: implement POST de reservas (reserves) via API REST
+
+[33mcommit 932527d0248ff14190f61cbca2400f04b6021acb[m[33m ([m[1;31morigin/feature/crud-rooms[m[33m, [m[1;32mfeature/importacao-xml[m[33m)[m
+Author: SavioKSLopes <koiwasubete@gmail.com>
+Date:   Mon Oct 5 19:44:18 2026 -0300
+
+    feat: implement CRUD de quartos (rooms) via API REST
+
+[33mcommit f1bb4115b79778cf4a02375156bd52717ba81a32[m[33m ([m[1;31morigin/feature/importacao-xml[m[33m)[m
+Author: SavioKSLopes <koiwasubete@gmail.com>
+Date:   Mon Oct 5 17:49:57 2026 -0300
+
+    feat: implementa comando de importacao XML
+
+[33mcommit 9bb90afee03ed4d8b12c0c242639185185941e02[m
+Author: SavioKSLopes <koiwasubete@gmail.com>
+Date:   Mon Oct 5 17:34:33 2026 -0300
+
+    feat: implementa comando de importacao XML
+
+[33mcommit 790184612497eca53101f64b64a21fa5fe63937a[m[33m ([m[1;31morigin/feature/migrations[m[33m, [m[1;32mmain[m[33m, [m[1;32mfeature/migrations[m[33m)[m
+Author: SavioKSLopes <koiwasubete@gmail.com>
+Date:   Mon Oct 5 16:58:12 2026 -0300
+
+    feat: implementa migrations e models de hotelaria
+
+[33mcommit 6725f2bc263c9f7a617c8933b309aa6f6c837d40[m[33m ([m[1;31morigin/main[m[33m)[m
+Author: SavioKSLopes <koiwasubete@gmail.com>
+Date:   Mon Oct 5 15:18:33 2026 -0300
+
+    chore: cria projeto Laravel com Sail
