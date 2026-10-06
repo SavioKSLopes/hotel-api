@@ -17,6 +17,10 @@ class Reserve extends Model
         'check_in',
         'check_out',
         'total',
+        'coupon_id',
+        'discount_total',
+        'fee_total',
+        'final_total'
     ];
 
     protected function casts():array
@@ -25,6 +29,9 @@ class Reserve extends Model
             'check_in' => 'date',
             'check_out' => 'date',
             'total' => 'decimal:2',
+            'discount_total' => 'decimal:2',
+            'fee_total' => 'decimal:2',
+            'final_total' => 'decimal:2',
         ];
     }
 
