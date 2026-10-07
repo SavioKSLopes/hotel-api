@@ -2,26 +2,25 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Resources\UserResource;
 use App\Models\Hotel;
 use App\Models\User;
-use App\Http\Resources\UserResource;
-use App\Services\UserService;
-use Illuminate\Http\Request;
+use App\Services\HotelUserService;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 use Illuminate\Http\Response;
 
 class HotelUserController extends Controller
 {
     public function __construct(
-        private UserService $userService,
-    ) {
-    }
+        private HotelUserService $HotelUserService,
+    ) {}
 
     public function index(int $hotelId): AnonymousResourceCollection
     {
         $hotel = Hotel::findOrFail($hotelId);
-        $users = $this->userService->listUsersByHotel($hotel);
+        $users = $this->HotelUserService->listUsersByHotel($hotel);
 
         return UserResource::collection($users);
     }
@@ -39,17 +38,17 @@ class HotelUserController extends Controller
             'is_active' => ['nullable', 'boolean'],
         ]);
 
-        $user = $this->userService->createUserInHotel($validated, $hotel, $creator);
+        $user = $this->HotelUserService->createUserInHotel($validated, $hotel, $creator);
 
-        return response()->json(new UserResource($user), 201);
+        return (new UserResource($user))->toResponse(request());
     }
 
     public function show(int $hotelId, int $userId): JsonResponse
     {
         $hotel = Hotel::findOrFail($hotelId);
-        $user = $this->userService->findUserByHotel($hotel, $userId);
+        $user = $this->HotelUserService->findUserByHotel($hotel, $userId);
 
-        return response()->json(new UserResource($user));
+        return (new UserResource($user))->toResponse(request());
     }
 
     public function update(Request $request, int $hotelId, int $userId): JsonResponse
@@ -65,9 +64,9 @@ class HotelUserController extends Controller
             'is_active' => ['nullable', 'boolean'],
         ]);
 
-        $user = $this->userService->updateUserInHotel($validated, $hotel, $userId, $updater);
+        $user = $this->HotelUserService->updateUserInHotel($validated, $hotel, $userId, $updater);
 
-        return response()->json(new UserResource($user));
+        return (new UserResource($user))->toResponse(request());
     }
 
     public function destroy(Request $request, int $hotelId, int $userId): Response
@@ -75,7 +74,7 @@ class HotelUserController extends Controller
         $hotel = Hotel::findOrFail($hotelId);
         $deleter = $request->user();
 
-        $this->userService->deleteUserFromHotel($hotel, $userId, $deleter);
+        $this->HotelUserService->deleteUserFromHotel($hotel, $userId, $deleter);
 
         return response()->noContent();
     }
