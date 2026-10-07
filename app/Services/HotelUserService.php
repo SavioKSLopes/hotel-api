@@ -2,13 +2,15 @@
 
 namespace App\Services;
 
-use App\Models\User;
 use App\Models\Hotel;
+use App\Models\User;
+use Illuminate\Auth\Access\AuthorizationException;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rule;
-use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Validation\ValidationException;
 
-class UserService
+class HotelUserService
 {
     public function canUserManageHotelUsers(User $user, Hotel $hotel): bool
     {
@@ -32,8 +34,8 @@ class UserService
 
     public function createUserInHotel(array $data, Hotel $hotel, User $creator): User
     {
-        if (!$this->canUserManageHotelUsers($creator, $hotel)) {
-            throw new \Illuminate\Auth\Access\AuthorizationException(
+        if (! $this->canUserManageHotelUsers($creator, $hotel)) {
+            throw new AuthorizationException(
                 'Sem permissão para criar usuários neste hotel.'
             );
         }
@@ -59,7 +61,7 @@ class UserService
             ->first();
 
         if ($existingUser) {
-            throw new \Illuminate\Validation\ValidationException(
+            throw new ValidationException(
                 'Já existe um usuário com este email neste hotel.'
             );
         }
@@ -83,8 +85,8 @@ class UserService
     {
         $user = $this->findUserByHotel($hotel, $userId);
 
-        if (!$this->canUserManageHotelUsers($updater, $hotel)) {
-            throw new \Illuminate\Auth\Access\AuthorizationException(
+        if (! $this->canUserManageHotelUsers($updater, $hotel)) {
+            throw new AuthorizationException(
                 'Sem permissão para atualizar usuários neste hotel.'
             );
         }
@@ -105,7 +107,6 @@ class UserService
             'is_active' => ['nullable', 'boolean'],
         ])->validate();
 
-        // Verifica se email já existe no hotel (ignorando o próprio usuário)
         if (isset($validated['email'])) {
             $existingUser = User::where('hotel_id', $hotel->id)
                 ->where('email', $validated['email'])
@@ -113,7 +114,7 @@ class UserService
                 ->first();
 
             if ($existingUser) {
-                throw new \Illuminate\Validation\ValidationException(
+                throw new ValidationException(
                     'Já existe um usuário com este email neste hotel.'
                 );
             }
@@ -148,8 +149,8 @@ class UserService
     {
         $user = $this->findUserByHotel($hotel, $userId);
 
-        if (!$this->canUserManageHotelUsers($deleter, $hotel)) {
-            throw new \Illuminate\Auth\Access\AuthorizationException(
+        if (! $this->canUserManageHotelUsers($deleter, $hotel)) {
+            throw new AuthorizationException(
                 'Sem permissão para remover usuários neste hotel.'
             );
         }
