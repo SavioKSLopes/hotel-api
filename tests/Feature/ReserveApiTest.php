@@ -10,7 +10,7 @@ use App\Models\Room;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
-class giReserveApiTest extends TestCase
+class ReserveApiTest extends TestCase
 {
     use RefreshDatabase;
 

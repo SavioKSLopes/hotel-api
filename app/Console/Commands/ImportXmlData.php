@@ -44,7 +44,7 @@ class ImportXmlData extends Command
     {
         $filePath = base_path('docs/xml/hotels.xml');
 
-        if (!file_exists($filePath)) {
+        if (! file_exists($filePath)) {
             $this->error("Arquivo XML não encontrado: {$filePath}");
 
             return Command::FAILURE;
@@ -87,7 +87,7 @@ class ImportXmlData extends Command
     {
         $filePath = base_path('docs/xml/rooms.xml');
 
-        if (!file_exists($filePath)) {
+        if (! file_exists($filePath)) {
             $this->error("Arquivo XML não encontrado: {$filePath}");
 
             return Command::FAILURE;
@@ -149,7 +149,7 @@ class ImportXmlData extends Command
     {
         $filePath = base_path('docs/xml/reserves.xml');
 
-        if (!file_exists($filePath)) {
+        if (! file_exists($filePath)) {
             $this->error("Arquivo XML não encontrado: {$filePath}");
 
             return Command::FAILURE;
@@ -196,13 +196,13 @@ class ImportXmlData extends Command
             if ($room === null) {
                 $this->error(
                     "O quarto {$externalRoomId} não pertence ao hotel "
-                    . "{$externalHotelId} ou não existe."
+                    ."{$externalHotelId} ou não existe."
                 );
 
                 return Command::FAILURE;
             }
 
-            if (!isset($reserveXml->Guests->Guest[0])) {
+            if (! isset($reserveXml->Guests->Guest[0])) {
                 $this->error(
                     "A reserva {$externalId} não possui hóspede."
                 );
@@ -288,13 +288,6 @@ class ImportXmlData extends Command
                                 'external_id' => $method,
                             ]);
 
-                            if ($paymentMethod === null) {
-                                throw new \RuntimeException(
-                                    "Método de pagamento não encontrado: "
-                                    . "{$method}"
-                                );
-                            }
-
                             Payment::updateOrCreate(
                                 [
                                     'reserve_id' => $reserve->id,
@@ -315,7 +308,7 @@ class ImportXmlData extends Command
 
                 $this->error(
                     "Erro ao importar a reserva {$externalId}: "
-                    . $e->getMessage()
+                    .$e->getMessage()
                 );
 
                 return Command::FAILURE;
@@ -326,7 +319,7 @@ class ImportXmlData extends Command
 
         $this->info(
             "Importação concluída: {$importedReserves} reserva(s) "
-            . "processada(s)."
+            .'processada(s).'
         );
 
         Log::info('Importação de reservas concluída', [

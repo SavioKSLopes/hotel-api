@@ -7,8 +7,8 @@ use App\Models\Fee;
 use App\Models\Reserve;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Validation\ValidationException;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Validation\ValidationException;
 
 class ReserveService
 {
@@ -26,12 +26,10 @@ class ReserveService
         return $overlappingReserves === 0;
     }
 
-    //Lógica de Cupons
-
     public function findValidCoupon(string $code): ?Coupon
     {
         $coupon = Coupon::where('code', $code)
-            ->where('active', true)  //
+            ->where('active', true)
             ->where('valid_from', '<=', now())
             ->where('valid_until', '>=', now())
             ->lockForUpdate()
@@ -39,7 +37,6 @@ class ReserveService
 
         return $coupon;
     }
-
 
     public function deactivateCoupon(Coupon $coupon): void
     {
@@ -49,10 +46,10 @@ class ReserveService
     public function calculateDiscount(Coupon $coupon, float $total): float
     {
         if ($coupon->type === 'percentage') {
-            return round(($total * $coupon->value) / 100,2);
+            return round(($total * $coupon->value) / 100, 2);
         }
 
-        return  round(min($coupon->value, $total));
+        return round(min($coupon->value, $total));
     }
 
     public function calculateReserveTotals(float $total, ?string $couponCode = null): array
@@ -70,7 +67,7 @@ class ReserveService
                 ]);
             }
 
-            if (!$coupon->canApplyTo($total)) {
+            if (! $coupon->canApplyTo($total)) {
                 throw ValidationException::withMessages([
                     'coupon_code' => $coupon->getMinimumPurchaseMessage(),
                 ]);
@@ -114,7 +111,7 @@ class ReserveService
     public function createReserve(array $data): Reserve
     {
         return DB::transaction(function () use ($data) {
-            if (!$this->checkAvailability(
+            if (! $this->checkAvailability(
                 $data['room_id'],
                 Carbon::parse($data['check_in']),
                 Carbon::parse($data['check_out'])
