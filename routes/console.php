@@ -9,7 +9,6 @@ Artisan::command('inspire', function () {
 })->purpose('Display an inspiring quote');
 
 Schedule::command('xml:import')
-    //teste
-    //->everyMinute()
+
     ->dailyAt('02:00')
     ->withoutOverlapping();

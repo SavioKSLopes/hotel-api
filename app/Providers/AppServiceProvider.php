@@ -10,12 +10,7 @@ class AppServiceProvider extends ServiceProvider
     public function register(): void
     {
         $this->app->singleton(ReserveService::class, function ($app) {
-            return new ReserveService();
+            return new ReserveService;
         });
-    }
-
-    public function boot(): void
-    {
-        //
     }
 }
