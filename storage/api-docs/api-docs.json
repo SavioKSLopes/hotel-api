@@ -1,0 +1,1727 @@
+{
+    "openapi": "3.0.0",
+    "info": {
+        "title": "Hotel API",
+        "description": "API REST para gerenciamento de hotéis, quartos, hóspedes, reservas, pagamentos, cupons e taxas.",
+        "version": "1.0.0"
+    },
+    "servers": [
+        {
+            "url": "http://localhost:8080",
+            "description": "Servidor local"
+        }
+    ],
+    "paths": {
+        "/api/reserves": {
+            "post": {
+                "tags": [
+                    "Reservas"
+                ],
+                "summary": "Cria uma reserva",
+                "description": "Cria uma reserva para um quarto em um período informado. A data de check-out deve ser posterior à data de check-in. Um cupom pode ser informado opcionalmente.",
+                "operationId": "b87d19f54deaace66d672515587ceb5c",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "external_id",
+                                    "hotel_id",
+                                    "room_id",
+                                    "guest_id",
+                                    "check_in",
+                                    "check_out",
+                                    "total"
+                                ],
+                                "properties": {
+                                    "external_id": {
+                                        "description": "Identificador externo e único da reserva",
+                                        "type": "string",
+                                        "example": "RES-0001",
+                                        "maxLength": 50
+                                    },
+                                    "hotel_id": {
+                                        "description": "Identificador do hotel",
+                                        "type": "integer",
+                                        "example": 1
+                                    },
+                                    "room_id": {
+                                        "description": "Identificador do quarto",
+                                        "type": "integer",
+                                        "example": 1
+                                    },
+                                    "guest_id": {
+                                        "description": "Identificador do hóspede",
+                                        "type": "integer",
+                                        "example": 1
+                                    },
+                                    "check_in": {
+                                        "description": "Data de entrada",
+                                        "type": "string",
+                                        "format": "date",
+                                        "example": "2026-10-20"
+                                    },
+                                    "check_out": {
+                                        "description": "Data de saída; deve ser posterior ao check-in",
+                                        "type": "string",
+                                        "format": "date",
+                                        "example": "2026-10-23"
+                                    },
+                                    "total": {
+                                        "description": "Valor total inicialmente informado para a reserva",
+                                        "type": "number",
+                                        "format": "float",
+                                        "example": 600,
+                                        "minimum": 0
+                                    },
+                                    "coupon_code": {
+                                        "description": "Código de cupom de desconto, quando aplicável",
+                                        "type": "string",
+                                        "example": "PROMO10",
+                                        "nullable": true,
+                                        "maxLength": 50
+                                    }
+                                },
+                                "type": "object"
+                            },
+                            "example": {
+                                "external_id": "RES-0001",
+                                "hotel_id": 1,
+                                "room_id": 1,
+                                "guest_id": 1,
+                                "check_in": "2026-10-20",
+                                "check_out": "2026-10-23",
+                                "total": 600,
+                                "coupon_code": "PROMO10"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Reserva criada com sucesso",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "id": {
+                                            "type": "integer",
+                                            "example": 1
+                                        },
+                                        "external_id": {
+                                            "type": "string",
+                                            "example": "RES-0001"
+                                        },
+                                        "hotel_id": {
+                                            "type": "integer",
+                                            "example": 1
+                                        },
+                                        "room_id": {
+                                            "type": "integer",
+                                            "example": 1
+                                        },
+                                        "guest_id": {
+                                            "type": "integer",
+                                            "example": 1
+                                        },
+                                        "coupon_id": {
+                                            "type": "integer",
+                                            "example": 1,
+                                            "nullable": true
+                                        },
+                                        "check_in": {
+                                            "type": "string",
+                                            "format": "date",
+                                            "example": "2026-10-20"
+                                        },
+                                        "check_out": {
+                                            "type": "string",
+                                            "format": "date",
+                                            "example": "2026-10-23"
+                                        },
+                                        "subtotal": {
+                                            "type": "number",
+                                            "format": "float",
+                                            "example": 600
+                                        },
+                                        "discount_total": {
+                                            "type": "number",
+                                            "format": "float",
+                                            "example": 60
+                                        },
+                                        "fee_total": {
+                                            "type": "number",
+                                            "format": "float",
+                                            "example": 20
+                                        },
+                                        "total": {
+                                            "type": "number",
+                                            "format": "float",
+                                            "example": 560
+                                        },
+                                        "created_at": {
+                                            "type": "string",
+                                            "format": "date-time"
+                                        },
+                                        "updated_at": {
+                                            "type": "string",
+                                            "format": "date-time"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Dados inválidos, entidades inexistentes, período inválido ou quarto indisponível",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "The check out field must be a date after check in."
+                                        },
+                                        "errors": {
+                                            "type": "object",
+                                            "example": {
+                                                "check_out": [
+                                                    "The check out field must be a date after check in."
+                                                ]
+                                            }
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/rooms": {
+            "get": {
+                "tags": [
+                    "Quartos"
+                ],
+                "summary": "Lista os quartos",
+                "description": "Retorna uma lista paginada de todos os quartos cadastrados, incluindo o hotel associado.",
+                "operationId": "db2a0f9c242ba089e87d5ae1fa8e14c5",
+                "responses": {
+                    "200": {
+                        "description": "Quartos retornados com sucesso",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/components/schemas/Room"
+                                            }
+                                        },
+                                        "links": {
+                                            "type": "object"
+                                        },
+                                        "meta": {
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Não autenticado"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            },
+            "post": {
+                "tags": [
+                    "Quartos"
+                ],
+                "summary": "Cria um quarto",
+                "description": "Cria um novo quarto associado a um hotel.",
+                "operationId": "809158a6b73bac8545f93f5b9f8a8a8a",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "hotel_id",
+                                    "external_id",
+                                    "name"
+                                ],
+                                "properties": {
+                                    "hotel_id": {
+                                        "type": "integer",
+                                        "example": 1
+                                    },
+                                    "external_id": {
+                                        "type": "string",
+                                        "example": "ROOM-101"
+                                    },
+                                    "name": {
+                                        "type": "string",
+                                        "example": "Quarto Standard 101"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Quarto criado com sucesso",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/components/schemas/Room"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Não autenticado"
+                    },
+                    "422": {
+                        "description": "Dados inválidos",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "The hotel id field is required."
+                                        },
+                                        "errors": {
+                                            "type": "object",
+                                            "example": {
+                                                "hotel_id": [
+                                                    "The hotel id field is required."
+                                                ]
+                                            }
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/rooms/{room}": {
+            "get": {
+                "tags": [
+                    "Quartos"
+                ],
+                "summary": "Busca um quarto",
+                "description": "Retorna os dados de um quarto pelo seu identificador.",
+                "operationId": "754d58756a0cc6c2aae5b8b085a9b586",
+                "parameters": [
+                    {
+                        "name": "room",
+                        "in": "path",
+                        "description": "ID do quarto",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 1
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Quarto encontrado",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/components/schemas/Room"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Não autenticado"
+                    },
+                    "404": {
+                        "description": "Quarto não encontrado"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            },
+            "put": {
+                "tags": [
+                    "Quartos"
+                ],
+                "summary": "Atualiza um quarto",
+                "description": "Atualiza todos os campos de um quarto existente.",
+                "operationId": "447ae83292e765bb69793a682a6e09ae",
+                "parameters": [
+                    {
+                        "name": "room",
+                        "in": "path",
+                        "description": "ID do quarto",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 1
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "hotel_id",
+                                    "external_id",
+                                    "name"
+                                ],
+                                "properties": {
+                                    "hotel_id": {
+                                        "type": "integer",
+                                        "example": 1
+                                    },
+                                    "external_id": {
+                                        "type": "string",
+                                        "example": "ROOM-101"
+                                    },
+                                    "name": {
+                                        "type": "string",
+                                        "example": "Quarto Standard Premium 101"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Quarto atualizado com sucesso",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/components/schemas/Room"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Não autenticado"
+                    },
+                    "404": {
+                        "description": "Quarto não encontrado"
+                    },
+                    "422": {
+                        "description": "Dados inválidos"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            },
+            "delete": {
+                "tags": [
+                    "Quartos"
+                ],
+                "summary": "Remove um quarto",
+                "description": "Exclui um quarto pelo seu identificador.",
+                "operationId": "ef6424e636121a7afb64777b06028a3a",
+                "parameters": [
+                    {
+                        "name": "room",
+                        "in": "path",
+                        "description": "ID do quarto",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 1
+                        }
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "Quarto removido com sucesso"
+                    },
+                    "401": {
+                        "description": "Não autenticado"
+                    },
+                    "404": {
+                        "description": "Quarto não encontrado"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            },
+            "patch": {
+                "tags": [
+                    "Quartos"
+                ],
+                "summary": "Atualiza parcialmente um quarto",
+                "description": "Atualiza somente os campos informados para um quarto existente.",
+                "operationId": "ad350d9bad928033cc38d64d32b4cd97",
+                "parameters": [
+                    {
+                        "name": "room",
+                        "in": "path",
+                        "description": "ID do quarto",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 1
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "hotel_id": {
+                                        "type": "integer",
+                                        "example": 1
+                                    },
+                                    "external_id": {
+                                        "type": "string",
+                                        "example": "ROOM-101"
+                                    },
+                                    "name": {
+                                        "type": "string",
+                                        "example": "Quarto Standard Premium 101"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Quarto atualizado com sucesso",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/components/schemas/Room"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Não autenticado"
+                    },
+                    "404": {
+                        "description": "Quarto não encontrado"
+                    },
+                    "422": {
+                        "description": "Dados inválidos"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/hotels/{hotelId}/users": {
+            "get": {
+                "tags": [
+                    "Usuários"
+                ],
+                "summary": "Lista usuários de um hotel",
+                "description": "Retorna os usuários associados ao hotel informado.",
+                "operationId": "9b503caf958a79ec79966e7c1cba702a",
+                "parameters": [
+                    {
+                        "name": "hotelId",
+                        "in": "path",
+                        "description": "ID do hotel",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 1
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Usuários retornados com sucesso",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/components/schemas/HotelUser"
+                                            }
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Não autenticado"
+                    },
+                    "403": {
+                        "description": "Sem permissão para acessar os usuários deste hotel"
+                    },
+                    "404": {
+                        "description": "Hotel não encontrado"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            },
+            "post": {
+                "tags": [
+                    "Usuários"
+                ],
+                "summary": "Cria um usuário no hotel",
+                "description": "Cria um novo usuário associado ao hotel com uma das funções permitidas: owner, manager ou receptionist.",
+                "operationId": "cfe1133779472fa479992609b2f7888e",
+                "parameters": [
+                    {
+                        "name": "hotelId",
+                        "in": "path",
+                        "description": "ID do hotel",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 1
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "name",
+                                    "email",
+                                    "password",
+                                    "role"
+                                ],
+                                "properties": {
+                                    "name": {
+                                        "description": "Nome completo do usuário",
+                                        "type": "string",
+                                        "example": "Maria Souza",
+                                        "maxLength": 255
+                                    },
+                                    "email": {
+                                        "description": "E-mail do usuário",
+                                        "type": "string",
+                                        "format": "email",
+                                        "example": "maria.souza@hotel.com"
+                                    },
+                                    "password": {
+                                        "description": "Senha com no mínimo 8 caracteres",
+                                        "type": "string",
+                                        "format": "password",
+                                        "example": "senha-segura-123",
+                                        "minLength": 8
+                                    },
+                                    "role": {
+                                        "description": "Função do usuário no hotel",
+                                        "type": "string",
+                                        "example": "manager",
+                                        "enum": [
+                                            "owner",
+                                            "manager",
+                                            "receptionist"
+                                        ]
+                                    },
+                                    "is_active": {
+                                        "description": "Indica se o usuário pode acessar o sistema",
+                                        "type": "boolean",
+                                        "example": true,
+                                        "nullable": true
+                                    }
+                                },
+                                "type": "object"
+                            },
+                            "example": {
+                                "name": "Maria Souza",
+                                "email": "maria.souza@hotel.com",
+                                "password": "senha-segura-123",
+                                "role": "manager",
+                                "is_active": true
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Usuário criado com sucesso",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/components/schemas/HotelUser"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Não autenticado"
+                    },
+                    "403": {
+                        "description": "Sem permissão para criar usuários neste hotel"
+                    },
+                    "404": {
+                        "description": "Hotel não encontrado"
+                    },
+                    "422": {
+                        "description": "Dados inválidos"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/hotels/{hotelId}/users/{userId}": {
+            "get": {
+                "tags": [
+                    "Usuários"
+                ],
+                "summary": "Busca um usuário do hotel",
+                "description": "Retorna um usuário que pertence ao hotel informado.",
+                "operationId": "91aa34123ce662ec738d13f6915abae0",
+                "parameters": [
+                    {
+                        "name": "hotelId",
+                        "in": "path",
+                        "description": "ID do hotel",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 1
+                        }
+                    },
+                    {
+                        "name": "userId",
+                        "in": "path",
+                        "description": "ID do usuário",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 1
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Usuário encontrado",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/components/schemas/HotelUser"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Não autenticado"
+                    },
+                    "403": {
+                        "description": "Sem permissão para acessar o usuário"
+                    },
+                    "404": {
+                        "description": "Hotel ou usuário não encontrado"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            },
+            "put": {
+                "tags": [
+                    "Usuários"
+                ],
+                "summary": "Atualiza um usuário do hotel",
+                "description": "Atualiza os dados informados para um usuário pertencente ao hotel.",
+                "operationId": "88b68577350400a539e61aeb9e9cd8f2",
+                "parameters": [
+                    {
+                        "name": "hotelId",
+                        "in": "path",
+                        "description": "ID do hotel",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 1
+                        }
+                    },
+                    {
+                        "name": "userId",
+                        "in": "path",
+                        "description": "ID do usuário",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 1
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "name": {
+                                        "type": "string",
+                                        "example": "Maria Souza",
+                                        "maxLength": 255
+                                    },
+                                    "email": {
+                                        "type": "string",
+                                        "format": "email",
+                                        "example": "maria.souza@hotel.com"
+                                    },
+                                    "password": {
+                                        "type": "string",
+                                        "format": "password",
+                                        "example": "nova-senha-segura",
+                                        "minLength": 8
+                                    },
+                                    "role": {
+                                        "type": "string",
+                                        "example": "receptionist",
+                                        "enum": [
+                                            "owner",
+                                            "manager",
+                                            "receptionist"
+                                        ]
+                                    },
+                                    "is_active": {
+                                        "type": "boolean",
+                                        "example": true
+                                    }
+                                },
+                                "type": "object"
+                            },
+                            "example": {
+                                "name": "Maria Souza",
+                                "role": "receptionist",
+                                "is_active": true
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Usuário atualizado com sucesso",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/components/schemas/HotelUser"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Não autenticado"
+                    },
+                    "403": {
+                        "description": "Sem permissão para atualizar o usuário"
+                    },
+                    "404": {
+                        "description": "Hotel ou usuário não encontrado"
+                    },
+                    "422": {
+                        "description": "Dados inválidos"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            },
+            "delete": {
+                "tags": [
+                    "Usuários"
+                ],
+                "summary": "Remove um usuário do hotel",
+                "description": "Remove um usuário pertencente ao hotel informado.",
+                "operationId": "581238d8abe3c454878fc1888008dd46",
+                "parameters": [
+                    {
+                        "name": "hotelId",
+                        "in": "path",
+                        "description": "ID do hotel",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 1
+                        }
+                    },
+                    {
+                        "name": "userId",
+                        "in": "path",
+                        "description": "ID do usuário",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 1
+                        }
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "Usuário removido com sucesso"
+                    },
+                    "401": {
+                        "description": "Não autenticado"
+                    },
+                    "403": {
+                        "description": "Sem permissão para remover o usuário"
+                    },
+                    "404": {
+                        "description": "Hotel ou usuário não encontrado"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            },
+            "patch": {
+                "tags": [
+                    "Usuários"
+                ],
+                "summary": "Atualiza parcialmente um usuário do hotel",
+                "description": "Atualiza somente os campos enviados para um usuário pertencente ao hotel.",
+                "operationId": "95ffdd7724329bf6892adc461931ec6a",
+                "parameters": [
+                    {
+                        "name": "hotelId",
+                        "in": "path",
+                        "description": "ID do hotel",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 1
+                        }
+                    },
+                    {
+                        "name": "userId",
+                        "in": "path",
+                        "description": "ID do usuário",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 1
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "name": {
+                                        "type": "string",
+                                        "example": "Maria Souza"
+                                    },
+                                    "email": {
+                                        "type": "string",
+                                        "format": "email",
+                                        "example": "maria.souza@hotel.com"
+                                    },
+                                    "password": {
+                                        "type": "string",
+                                        "format": "password",
+                                        "minLength": 8
+                                    },
+                                    "role": {
+                                        "type": "string",
+                                        "example": "manager",
+                                        "enum": [
+                                            "owner",
+                                            "manager",
+                                            "receptionist"
+                                        ]
+                                    },
+                                    "is_active": {
+                                        "type": "boolean",
+                                        "example": true
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Usuário atualizado com sucesso",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/components/schemas/HotelUser"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Não autenticado"
+                    },
+                    "403": {
+                        "description": "Sem permissão para atualizar o usuário"
+                    },
+                    "404": {
+                        "description": "Hotel ou usuário não encontrado"
+                    },
+                    "422": {
+                        "description": "Dados inválidos"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/hotels/{hotelId}/payments": {
+            "get": {
+                "tags": [
+                    "Pagamentos"
+                ],
+                "summary": "Lista os pagamentos de um hotel",
+                "description": "Retorna todos os pagamentos vinculados às reservas de um hotel.",
+                "operationId": "72dad48cece5255c86343690e5b66927",
+                "parameters": [
+                    {
+                        "name": "hotelId",
+                        "in": "path",
+                        "description": "ID do hotel",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 1
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Pagamentos retornados com sucesso",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/components/schemas/Payment"
+                                            }
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Não autenticado"
+                    },
+                    "403": {
+                        "description": "Sem permissão para acessar os pagamentos deste hotel"
+                    },
+                    "404": {
+                        "description": "Hotel não encontrado"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            },
+            "post": {
+                "tags": [
+                    "Pagamentos"
+                ],
+                "summary": "Cria um pagamento",
+                "description": "Registra um pagamento para uma reserva vinculada ao hotel informado.",
+                "operationId": "c0c45ecc0a29b511fd2fd5eaaa09ac95",
+                "parameters": [
+                    {
+                        "name": "hotelId",
+                        "in": "path",
+                        "description": "ID do hotel",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 1
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "reserve_id",
+                                    "payment_method_id",
+                                    "value"
+                                ],
+                                "properties": {
+                                    "reserve_id": {
+                                        "description": "ID da reserva que receberá o pagamento",
+                                        "type": "integer",
+                                        "example": 1
+                                    },
+                                    "payment_method_id": {
+                                        "description": "ID do método de pagamento",
+                                        "type": "integer",
+                                        "example": 1
+                                    },
+                                    "value": {
+                                        "description": "Valor do pagamento",
+                                        "type": "number",
+                                        "format": "float",
+                                        "example": 250,
+                                        "minimum": 0
+                                    },
+                                    "status": {
+                                        "description": "Status inicial do pagamento",
+                                        "type": "string",
+                                        "example": "pending"
+                                    },
+                                    "external_reference": {
+                                        "description": "Referência externa da transação",
+                                        "type": "string",
+                                        "example": "TXN-123456",
+                                        "nullable": true
+                                    },
+                                    "metadata": {
+                                        "description": "Metadados adicionais do pagamento",
+                                        "type": "object",
+                                        "example": {
+                                            "gateway": "stripe",
+                                            "transaction_id": "pi_123456"
+                                        },
+                                        "nullable": true
+                                    },
+                                    "paid_at": {
+                                        "description": "Data e hora de confirmação do pagamento",
+                                        "type": "string",
+                                        "format": "date-time",
+                                        "example": "2026-10-06T22:30:00Z",
+                                        "nullable": true
+                                    }
+                                },
+                                "type": "object"
+                            },
+                            "example": {
+                                "reserve_id": 1,
+                                "payment_method_id": 1,
+                                "value": 250,
+                                "status": "pending",
+                                "external_reference": "TXN-123456",
+                                "metadata": {
+                                    "gateway": "stripe",
+                                    "transaction_id": "pi_123456"
+                                },
+                                "paid_at": "2026-10-06T22:30:00Z"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Pagamento criado com sucesso",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/components/schemas/Payment"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Não autenticado"
+                    },
+                    "403": {
+                        "description": "Sem permissão para criar pagamentos neste hotel"
+                    },
+                    "404": {
+                        "description": "Hotel não encontrado"
+                    },
+                    "422": {
+                        "description": "Dados inválidos"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/hotels/{hotelId}/payments/{paymentId}": {
+            "get": {
+                "tags": [
+                    "Pagamentos"
+                ],
+                "summary": "Busca um pagamento",
+                "description": "Retorna um pagamento pertencente ao hotel informado.",
+                "operationId": "714780887c3a4f7332c0799b775ae504",
+                "parameters": [
+                    {
+                        "name": "hotelId",
+                        "in": "path",
+                        "description": "ID do hotel",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 1
+                        }
+                    },
+                    {
+                        "name": "paymentId",
+                        "in": "path",
+                        "description": "ID do pagamento",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 1
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Pagamento encontrado",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/components/schemas/Payment"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Não autenticado"
+                    },
+                    "403": {
+                        "description": "Sem permissão para acessar o pagamento"
+                    },
+                    "404": {
+                        "description": "Hotel ou pagamento não encontrado"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            },
+            "put": {
+                "tags": [
+                    "Pagamentos"
+                ],
+                "summary": "Atualiza um pagamento",
+                "description": "Atualiza o status e, opcionalmente, o valor, a referência externa e os metadados de um pagamento.",
+                "operationId": "6922ec6170a2b41e90b1f1eb806a6e0d",
+                "parameters": [
+                    {
+                        "name": "hotelId",
+                        "in": "path",
+                        "description": "ID do hotel",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 1
+                        }
+                    },
+                    {
+                        "name": "paymentId",
+                        "in": "path",
+                        "description": "ID do pagamento",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 1
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "status"
+                                ],
+                                "properties": {
+                                    "status": {
+                                        "description": "Novo status do pagamento",
+                                        "type": "string",
+                                        "example": "paid",
+                                        "enum": [
+                                            "pending",
+                                            "paid",
+                                            "refunded",
+                                            "failed"
+                                        ]
+                                    },
+                                    "value": {
+                                        "type": "number",
+                                        "format": "float",
+                                        "example": 250,
+                                        "nullable": true,
+                                        "minimum": 0
+                                    },
+                                    "external_reference": {
+                                        "type": "string",
+                                        "example": "TXN-123456",
+                                        "nullable": true
+                                    },
+                                    "metadata": {
+                                        "type": "object",
+                                        "example": {
+                                            "gateway": "stripe",
+                                            "transaction_id": "pi_123456"
+                                        },
+                                        "nullable": true
+                                    }
+                                },
+                                "type": "object"
+                            },
+                            "example": {
+                                "status": "paid",
+                                "value": 250,
+                                "external_reference": "TXN-123456",
+                                "metadata": {
+                                    "gateway": "stripe",
+                                    "transaction_id": "pi_123456"
+                                }
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Pagamento atualizado com sucesso",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/components/schemas/Payment"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Não autenticado"
+                    },
+                    "403": {
+                        "description": "Sem permissão para atualizar o pagamento"
+                    },
+                    "404": {
+                        "description": "Hotel ou pagamento não encontrado"
+                    },
+                    "422": {
+                        "description": "Dados inválidos"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            },
+            "patch": {
+                "tags": [
+                    "Pagamentos"
+                ],
+                "summary": "Atualiza parcialmente um pagamento",
+                "description": "Atualiza o pagamento. O status é obrigatório conforme a regra atual da API.",
+                "operationId": "6515e7b27f61fdc76133c2cedb863109",
+                "parameters": [
+                    {
+                        "name": "hotelId",
+                        "in": "path",
+                        "description": "ID do hotel",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 1
+                        }
+                    },
+                    {
+                        "name": "paymentId",
+                        "in": "path",
+                        "description": "ID do pagamento",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 1
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "status"
+                                ],
+                                "properties": {
+                                    "status": {
+                                        "type": "string",
+                                        "example": "paid",
+                                        "enum": [
+                                            "pending",
+                                            "paid",
+                                            "refunded",
+                                            "failed"
+                                        ]
+                                    },
+                                    "value": {
+                                        "type": "number",
+                                        "format": "float",
+                                        "example": 250,
+                                        "nullable": true,
+                                        "minimum": 0
+                                    },
+                                    "external_reference": {
+                                        "type": "string",
+                                        "example": "TXN-123456",
+                                        "nullable": true
+                                    },
+                                    "metadata": {
+                                        "type": "object",
+                                        "nullable": true
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Pagamento atualizado com sucesso",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/components/schemas/Payment"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Não autenticado"
+                    },
+                    "403": {
+                        "description": "Sem permissão para atualizar o pagamento"
+                    },
+                    "404": {
+                        "description": "Hotel ou pagamento não encontrado"
+                    },
+                    "422": {
+                        "description": "Dados inválidos"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        }
+    },
+    "components": {
+        "schemas": {
+            "Room": {
+                "title": "Quarto",
+                "required": [
+                    "id",
+                    "hotel_id",
+                    "external_id",
+                    "name"
+                ],
+                "properties": {
+                    "id": {
+                        "type": "integer",
+                        "example": 1
+                    },
+                    "hotel_id": {
+                        "type": "integer",
+                        "example": 1
+                    },
+                    "external_id": {
+                        "type": "string",
+                        "example": "ROOM-101"
+                    },
+                    "name": {
+                        "type": "string",
+                        "example": "Quarto Standard 101"
+                    },
+                    "created_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "example": "2026-10-06T14:30:00.000000Z"
+                    },
+                    "updated_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "example": "2026-10-06T14:30:00.000000Z"
+                    }
+                },
+                "type": "object"
+            },
+            "Payment": {
+                "title": "Pagamento",
+                "required": [
+                    "id",
+                    "reserve_id",
+                    "payment_method_id",
+                    "value",
+                    "status"
+                ],
+                "properties": {
+                    "id": {
+                        "type": "integer",
+                        "example": 1
+                    },
+                    "reserve_id": {
+                        "type": "integer",
+                        "example": 1
+                    },
+                    "payment_method_id": {
+                        "type": "integer",
+                        "example": 1
+                    },
+                    "value": {
+                        "type": "number",
+                        "format": "float",
+                        "example": 250
+                    },
+                    "status": {
+                        "type": "string",
+                        "example": "paid",
+                        "enum": [
+                            "pending",
+                            "paid",
+                            "refunded",
+                            "failed"
+                        ]
+                    },
+                    "external_reference": {
+                        "type": "string",
+                        "example": "TXN-123456",
+                        "nullable": true
+                    },
+                    "metadata": {
+                        "type": "object",
+                        "example": {
+                            "gateway": "stripe",
+                            "transaction_id": "pi_123456"
+                        },
+                        "nullable": true
+                    },
+                    "paid_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "example": "2026-10-06T22:30:00.000000Z",
+                        "nullable": true
+                    },
+                    "created_at": {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "updated_at": {
+                        "type": "string",
+                        "format": "date-time"
+                    }
+                },
+                "type": "object"
+            },
+            "HotelUser": {
+                "title": "Usuário do hotel",
+                "required": [
+                    "id",
+                    "hotel_id",
+                    "name",
+                    "email",
+                    "role"
+                ],
+                "properties": {
+                    "id": {
+                        "type": "integer",
+                        "example": 1
+                    },
+                    "hotel_id": {
+                        "type": "integer",
+                        "example": 1
+                    },
+                    "name": {
+                        "type": "string",
+                        "example": "Maria Souza"
+                    },
+                    "email": {
+                        "type": "string",
+                        "format": "email",
+                        "example": "maria.souza@hotel.com"
+                    },
+                    "role": {
+                        "type": "string",
+                        "example": "manager",
+                        "enum": [
+                            "owner",
+                            "manager",
+                            "receptionist"
+                        ]
+                    },
+                    "is_active": {
+                        "type": "boolean",
+                        "example": true
+                    },
+                    "created_at": {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "updated_at": {
+                        "type": "string",
+                        "format": "date-time"
+                    }
+                },
+                "type": "object"
+            }
+        },
+        "securitySchemes": {
+            "sanctum": {
+                "type": "http",
+                "description": "Informe o token no formato: Bearer {token}",
+                "bearerFormat": "Sanctum",
+                "scheme": "bearer"
+            }
+        }
+    },
+    "tags": [
+        {
+            "name": "Reservas",
+            "description": "Reservas"
+        },
+        {
+            "name": "Quartos",
+            "description": "Quartos"
+        },
+        {
+            "name": "Usuários",
+            "description": "Usuários"
+        },
+        {
+            "name": "Pagamentos",
+            "description": "Pagamentos"
+        }
+    ]
+}
