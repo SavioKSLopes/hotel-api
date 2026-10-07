@@ -2,9 +2,11 @@
 
 namespace App\Services;
 
-use App\Models\Payment;
 use App\Models\Hotel;
+use App\Models\Payment;
+use App\Models\Reserve;
 use App\Models\User;
+use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Validation\Rule;
 
@@ -31,15 +33,15 @@ class PaymentService
     {
         return Payment::where('hotel_id', $hotel->id)
             ->with('reserve')
-            ->firstOrFail($paymentId);
+            ->findOrFail($paymentId);
     }
 
     public function updatePayment(array $data, Hotel $hotel, int $paymentId, User $updater): Payment
     {
         $payment = $this->findPaymentByHotel($hotel, $paymentId);
 
-        if (!$this->canUserManageHotelPayments($updater, $hotel)) {
-            throw new \Illuminate\Auth\Access\AuthorizationException(
+        if (! $this->canUserManageHotelPayments($updater, $hotel)) {
+            throw new AuthorizationException(
                 'Sem permissão para atualizar pagamentos neste hotel.'
             );
         }
@@ -52,11 +54,17 @@ class PaymentService
                 'failed',
             ])],
 
+            'value' => ['nullable', 'numeric', 'min:0'],
+
             'external_reference' => ['nullable', 'string', 'max:255'],
             'metadata' => ['nullable', 'array'],
         ])->validate();
 
         $payment->status = $validated['status'];
+
+        if (isset($validated['value'])) {
+            $payment->value = $validated['value'];
+        }
 
         if (isset($validated['external_reference'])) {
             $payment->external_reference = $validated['external_reference'];
@@ -75,5 +83,24 @@ class PaymentService
         $payment->load('reserve');
 
         return $payment;
+    }
+
+    public function create(int $hotelId, array $data): Payment
+    {
+        $reserve = Reserve::query()
+            ->where('id', $data['reserve_id'])
+            ->where('hotel_id', $hotelId)
+            ->firstOrFail();
+
+        return Payment::create([
+            'hotel_id' => $hotelId,
+            'reserve_id' => $reserve->id,
+            'payment_method_id' => $data['payment_method_id'],
+            'value' => $data['value'],
+            'status' => $data['status'] ?? 'pending',
+            'external_reference' => $data['external_reference'] ?? null,
+            'metadata' => $data['metadata'] ?? null,
+            'paid_at' => $data['paid_at'] ?? null,
+        ]);
     }
 }
