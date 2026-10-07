@@ -4,6 +4,7 @@ namespace Tests\Feature;
 
 use App\Models\Hotel;
 use App\Models\Room;
+use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -11,12 +12,29 @@ class RoomApiTest extends TestCase
 {
     use RefreshDatabase;
 
-    public function test_it_lists_rooms_with_pagination(): void
+    private function createUserWithHotel(): array
     {
         $hotel = Hotel::create([
-            'external_id' => 'HOTEL-ROOM-LIST-001',
-            'name' => 'Hotel de Listagem',
+            'external_id' => 'HOTEL-TEST-001',
+            'name' => 'Hotel Test',
         ]);
+
+        $user = User::create([
+            'name' => 'Test User',
+            'email' => 'test@example.com',
+            'password' => bcrypt('password'),
+            'hotel_id' => $hotel->id,
+            'role' => 'manager',
+            'is_active' => true,
+        ]);
+
+        return ['hotel' => $hotel, 'user' => $user];
+    }
+
+    public function test_it_lists_rooms_with_pagination(): void
+    {
+        $creds = $this->createUserWithHotel();
+        $hotel = $creds['hotel'];
 
         Room::create([
             'hotel_id' => $hotel->id,
@@ -30,7 +48,7 @@ class RoomApiTest extends TestCase
             'name' => 'Quarto de Listagem 2',
         ]);
 
-        $response = $this->getJson('/api/rooms');
+        $response = $this->actingAs($creds['user'])->getJson('/api/rooms');
 
         $response
             ->assertOk()
@@ -46,12 +64,10 @@ class RoomApiTest extends TestCase
 
     public function test_it_creates_a_room(): void
     {
-        $hotel = Hotel::create([
-            'external_id' => 'HOTEL-ROOM-CREATE-001',
-            'name' => 'Hotel de Criação',
-        ]);
+        $creds = $this->createUserWithHotel();
+        $hotel = $creds['hotel'];
 
-        $response = $this->postJson('/api/rooms', [
+        $response = $this->actingAs($creds['user'])->postJson('/api/rooms', [
             'hotel_id' => $hotel->id,
             'external_id' => 'ROOM-CREATE-001',
             'name' => 'Quarto de Criação',
@@ -72,7 +88,9 @@ class RoomApiTest extends TestCase
 
     public function test_it_requires_room_creation_fields(): void
     {
-        $response = $this->postJson('/api/rooms', []);
+        $creds = $this->createUserWithHotel();
+
+        $response = $this->actingAs($creds['user'])->postJson('/api/rooms', []);
 
         $response
             ->assertUnprocessable()
@@ -87,10 +105,8 @@ class RoomApiTest extends TestCase
 
     public function test_it_shows_a_room(): void
     {
-        $hotel = Hotel::create([
-            'external_id' => 'HOTEL-ROOM-SHOW-001',
-            'name' => 'Hotel de Consulta',
-        ]);
+        $creds = $this->createUserWithHotel();
+        $hotel = $creds['hotel'];
 
         $room = Room::create([
             'hotel_id' => $hotel->id,
@@ -98,7 +114,7 @@ class RoomApiTest extends TestCase
             'name' => 'Quarto de Consulta',
         ]);
 
-        $response = $this->getJson("/api/rooms/{$room->id}");
+        $response = $this->actingAs($creds['user'])->getJson("/api/rooms/{$room->id}");
 
         $response
             ->assertOk()
@@ -110,10 +126,8 @@ class RoomApiTest extends TestCase
 
     public function test_it_updates_a_room(): void
     {
-        $hotel = Hotel::create([
-            'external_id' => 'HOTEL-ROOM-UPDATE-001',
-            'name' => 'Hotel de Atualização',
-        ]);
+        $creds = $this->createUserWithHotel();
+        $hotel = $creds['hotel'];
 
         $room = Room::create([
             'hotel_id' => $hotel->id,
@@ -121,7 +135,7 @@ class RoomApiTest extends TestCase
             'name' => 'Quarto Antigo',
         ]);
 
-        $response = $this->patchJson("/api/rooms/{$room->id}", [
+        $response = $this->actingAs($creds['user'])->patchJson("/api/rooms/{$room->id}", [
             'name' => 'Quarto Atualizado',
         ]);
 
@@ -138,10 +152,8 @@ class RoomApiTest extends TestCase
 
     public function test_it_deletes_a_room(): void
     {
-        $hotel = Hotel::create([
-            'external_id' => 'HOTEL-ROOM-DELETE-001',
-            'name' => 'Hotel de Exclusão',
-        ]);
+        $creds = $this->createUserWithHotel();
+        $hotel = $creds['hotel'];
 
         $room = Room::create([
             'hotel_id' => $hotel->id,
@@ -149,7 +161,7 @@ class RoomApiTest extends TestCase
             'name' => 'Quarto para Excluir',
         ]);
 
-        $response = $this->deleteJson("/api/rooms/{$room->id}");
+        $response = $this->actingAs($creds['user'])->deleteJson("/api/rooms/{$room->id}");
 
         $response->assertNoContent();
 
